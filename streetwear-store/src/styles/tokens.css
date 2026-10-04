@@ -1,0 +1,30 @@
+/*
+ * ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
+ * Re-theme the whole store from this one file: colours, fonts, radius, motion.
+ * Tailwind utilities (bg-bg, text-ink, text-muted, border-line, bg-accent, font-display…)
+ * are generated from these variables in src/app/globals.css.
+ */
+:root {
+  /* palette */
+  --brand-bg: #f5f3ee; /* off-white page background */
+  --brand-surface: #ffffff; /* cards, drawers */
+  --brand-ink: #0e0e0e; /* text, primary buttons */
+  --brand-muted: #6e6b66; /* secondary text */
+  --brand-line: #e2ded6; /* hairlines / borders */
+  --brand-subtle: #ebe8e1; /* image placeholders, chips */
+  --brand-accent: #ff5a1f; /* the one accent colour */
+  --brand-accent-ink: #0e0e0e; /* text on accent */
+  --brand-danger: #b42318;
+  --brand-success: #1e7a3c;
+
+  /* typography – fonts are self-hosted via @fontsource (see src/app/layout.tsx) */
+  --brand-font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --brand-font-sans:
+    "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* shape & motion */
+  --brand-radius: 0px;
+  --brand-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --brand-duration: 400ms;
+  --brand-header-h: 64px;
+}
