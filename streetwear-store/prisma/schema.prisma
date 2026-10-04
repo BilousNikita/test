@@ -1,0 +1,239 @@
+// Prisma schema – provider-agnostic (SQLite for dev, PostgreSQL for production).
+// The datasource provider below is rewritten automatically by `scripts/select-db-provider.mjs`
+// based on DATABASE_URL (file:... => sqlite, postgres://... => postgresql). Do not use enums or
+// provider-specific features here so the same schema works on both.
+// All money values are stored as integers in MINOR units (cents/agorot).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  description   String    @default("")
+  imageUrl      String?
+  position      Int       @default(0)
+  isPlaceholder Boolean   @default(false)
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Collection {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  description   String    @default("")
+  imageUrl      String?
+  featured      Boolean   @default(true)
+  position      Int       @default(0)
+  isPlaceholder Boolean   @default(false)
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Product {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  description    String         @default("")
+  details        String         @default("") // newline separated bullet points (material, fit…)
+  status         String         @default("active") // active | draft | archived
+  featured       Boolean        @default(false)
+  tags           String         @default("")
+  searchText     String         @default("") // lowercase name/description/tags, used for case-insensitive search on every DB
+  categoryId     String?
+  category       Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  collections    Collection[]
+  // Dropshipping / supplier fields
+  supplierName   String         @default("")
+  supplierSku    String         @default("")
+  supplierUrl    String         @default("")
+  supplierCost   Int            @default(0) // minor units
+  retailPrice    Int            @default(0) // minor units – what the customer pays
+  compareAtPrice Int? // optional "was" price
+  priceOverride  Boolean        @default(false) // true = retailPrice set manually, ignore markup rule
+  margin         Int            @default(0) // retailPrice - supplierCost (auto-calculated)
+  isPlaceholder  Boolean        @default(false)
+  images         ProductImage[]
+  variants       Variant[]
+  orderItems     OrderItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([categoryId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String  @default("")
+  color     String? // optional: links the image to a variant color (gallery switches on color select)
+  position  Int     @default(0)
+
+  @@index([productId])
+}
+
+model Variant {
+  id          String      @id @default(cuid())
+  productId   String
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku         String      @unique
+  size        String
+  color       String
+  colorHex    String      @default("#111111")
+  stock       Int         @default(0)
+  supplierSku String      @default("")
+  position    Int         @default(0)
+  orderItems  OrderItem[]
+
+  @@unique([productId, size, color])
+  @@index([productId])
+}
+
+model Order {
+  id                 String          @id @default(cuid())
+  orderNumber        String          @unique
+  accessToken        String          @unique // secret used in the confirmation URL
+  email              String
+  status             String          @default("pending") // pending | paid | processing | shipped | delivered | cancelled | refunded
+  paymentProvider    String          @default("stripe")
+  paymentRef         String? // e.g. Stripe Checkout Session id
+  paymentIntentRef   String?
+  currency           String
+  subtotal           Int
+  shippingCost       Int
+  taxAmount          Int
+  taxRateBps         Int // tax rate in basis points (1700 = 17%)
+  pricesIncludeTax   Boolean
+  total              Int
+  shippingMethodId   String?
+  shippingMethodName String
+  // Shipping address snapshot
+  shipName           String
+  shipLine1          String
+  shipLine2          String          @default("")
+  shipCity           String
+  shipRegion         String          @default("")
+  shipPostalCode     String
+  shipCountry        String
+  shipPhone          String          @default("")
+  // Fulfilment
+  trackingNumber     String?
+  trackingCarrier    String?
+  trackingUrl        String?
+  refundNote         String?
+  adminNotes         String?
+  paidAt             DateTime?
+  shippedAt          DateTime?
+  confirmationSentAt DateTime?
+  items              OrderItem[]
+  supplierOrders     SupplierOrder[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  product      Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variantId    String?
+  variant      Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productName  String
+  variantLabel String
+  sku          String
+  imageUrl     String?
+  unitPrice    Int
+  quantity     Int
+  lineTotal    Int
+  supplierName String   @default("")
+  supplierSku  String   @default("")
+  supplierCost Int      @default(0)
+
+  @@index([orderId])
+}
+
+model SupplierOrder {
+  id               String   @id @default(cuid())
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  supplierName     String
+  status           String   @default("pending") // pending | placed | shipped | delivered
+  shippingSnapshot String // JSON: customer name/address/phone/email
+  itemsSnapshot    String // JSON: [{supplierSku, sku, name, variant, quantity, supplierCost, supplierUrl}]
+  supplierOrderRef String?
+  trackingNumber   String?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model ShippingMethod {
+  id          String  @id @default(cuid())
+  name        String
+  description String  @default("")
+  price       Int // minor units
+  freeOver    Int? // free when subtotal >= this (minor units)
+  minDays     Int     @default(3)
+  maxDays     Int     @default(7)
+  active      Boolean @default(true)
+  position    Int     @default(0)
+}
+
+model Setting {
+  key       String   @id
+  value     String // JSON encoded
+  updatedAt DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String         @default("Admin")
+  passwordHash String
+  sessions     AdminSession[]
+  createdAt    DateTime       @default(now())
+}
+
+model AdminSession {
+  id        String    @id // sha256 of the session token
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}

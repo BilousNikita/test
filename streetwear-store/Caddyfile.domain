@@ -1,0 +1,21 @@
+# Ready-made Caddyfile for a real domain with automatic HTTPS.
+# Usage: cp Caddyfile.domain Caddyfile, replace shop.example.com, set SITE_URL=https://shop.example.com,
+# then `docker compose up -d`. Caddy obtains and renews the Let's Encrypt certificate automatically
+# (ports 80 and 443 must be open and the domain's A record must point to this server).
+{
+	email admin@example.com
+}
+
+shop.example.com, www.shop.example.com {
+	encode zstd gzip
+	request_body {
+		max_size 20MB
+	}
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	}
+	@www host www.shop.example.com
+	redir @www https://shop.example.com{uri} permanent
+	reverse_proxy app:3000
+}

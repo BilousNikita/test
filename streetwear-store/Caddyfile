@@ -1,0 +1,16 @@
+# ── Reverse proxy ─────────────────────────────────────────────────────────────
+# IP mode (default): plain HTTP on port 80, works on a bare server IP.
+#
+# To switch to a domain with automatic HTTPS (Let's Encrypt), change the ONE line below
+# from ":80" to your domain, e.g.:
+#     shop.example.com, www.shop.example.com {
+# and set SITE_URL=https://shop.example.com in .env. Then: docker compose up -d
+# (A complete example is in Caddyfile.domain.)
+:80 {
+	encode zstd gzip
+	request_body {
+		max_size 20MB
+	}
+	header -Server
+	reverse_proxy app:3000
+}

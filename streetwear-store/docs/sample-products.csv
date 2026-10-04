@@ -1,0 +1,5 @@
+handle,name,category,collections,description,details,status,featured,tags,supplier_name,supplier_sku,supplier_url,supplier_cost,retail_price,compare_at_price,price_override,images,variant_sku,size,color,color_hex,stock,variant_supplier_sku
+essential-crew-sweat,Essential Crew Sweat,hoodies,core-essentials,"A midweight crewneck in brushed fleece.","380gsm brushed fleece\nRelaxed fit",active,false,sweatshirt crew,CJ Dropshipping,CJ-CREW-380,https://supplier.example.com/p/crew,18.40,,,false,,CREW-BLK-S,S,Black,#141414,12,CJVID-1001
+essential-crew-sweat,Essential Crew Sweat,hoodies,core-essentials,,,,,,,,,,,,,,CREW-BLK-M,M,Black,#141414,20,CJVID-1002
+essential-crew-sweat,Essential Crew Sweat,hoodies,core-essentials,,,,,,,,,,,,,,CREW-BLK-L,L,Black,#141414,8,CJVID-1003
+logo-beanie,Logo Beanie,accessories,,"Ribbed knit beanie with woven label.",,draft,false,beanie hat,PrintLab Studio,PL-BEANIE,,6.00,29.00,,true,,BEANIE-BLK-OS,One Size,Black,#141414,40,
