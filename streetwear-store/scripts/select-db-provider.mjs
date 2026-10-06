@@ -5,8 +5,10 @@
 // Can be forced with DATABASE_PROVIDER=sqlite|postgresql (useful at Docker build time).
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+// fileURLToPath (not URL.pathname) so this also works on Windows (C:\...).
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function readDotEnv(file) {
   const out = {};
