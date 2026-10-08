@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@theme inline {
+  --color-bg: var(--brand-bg);
+  --color-surface: var(--brand-surface);
+  --color-ink: var(--brand-ink);
+  --color-muted: var(--brand-muted);
+  --color-line: var(--brand-line);
+  --color-subtle: var(--brand-subtle);
+  --color-accent: var(--brand-accent);
+  --color-accent-ink: var(--brand-accent-ink);
+  --color-danger: var(--brand-danger);
+  --color-success: var(--brand-success);
+  --font-display: var(--brand-font-display);
+  --font-sans: var(--brand-font-sans);
+  --radius-brand: var(--brand-radius);
+  --ease-brand: var(--brand-ease);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+  }
+  ::selection {
+    background: var(--brand-accent);
+    color: var(--brand-accent-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand-accent);
+    outline-offset: 2px;
+  }
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.45);
+  }
+}
+
+@utility container-x {
+  @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10;
+}
+@utility display {
+  @apply font-display leading-[0.92] tracking-tight uppercase;
+}
+@utility eyebrow {
+  @apply text-muted text-[11px] font-semibold tracking-[0.2em] uppercase;
+}
+@utility btn {
+  @apply rounded-brand inline-flex h-12 items-center justify-center gap-2 px-6 text-[13px] font-semibold tracking-[0.12em] uppercase transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-ink text-bg hover:bg-accent hover:text-accent-ink;
+}
+@utility btn-outline {
+  @apply btn border-ink text-ink hover:bg-ink hover:text-bg border;
+}
+@utility btn-accent {
+  @apply btn bg-accent text-accent-ink hover:bg-ink hover:text-bg;
+}
+@utility input {
+  @apply bg-surface border-line placeholder:text-muted/70 focus:border-ink rounded-brand h-12 w-full border px-4 text-[15px] transition-colors focus:outline-none;
+}
+@utility label {
+  @apply text-muted mb-1.5 block text-xs font-medium tracking-wide uppercase;
+}
+@utility link-underline {
+  @apply bg-gradient-to-r from-current to-current bg-[length:0%_1px] bg-left-bottom bg-no-repeat transition-[background-size] duration-300 hover:bg-[length:100%_1px];
+}
+
+@layer components {
+  .prose-store {
+    @apply text-ink/85 text-[15px] leading-7;
+  }
+  .prose-store h2 {
+    @apply font-display text-ink mt-10 mb-3 text-2xl uppercase;
+  }
+  .prose-store p,
+  .prose-store ul {
+    @apply mb-4;
+  }
+  .prose-store ul {
+    @apply list-disc ps-5;
+  }
+  .prose-store a {
+    @apply underline underline-offset-4;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.8s var(--brand-ease) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease both;
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.9s var(--brand-ease),
+    transform 0.9s var(--brand-ease);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
